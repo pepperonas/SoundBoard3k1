@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,7 +39,7 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
         SoundItem soundItem = soundItems.get(position);
         holder.soundButton.setText(soundItem.getDisplayName());
         
-        holder.soundButton.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 soundPlayer.playSound(soundItem.getFolderName(), soundItem.getFileName());
@@ -64,7 +64,7 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
     }
 
     static class SoundViewHolder extends RecyclerView.ViewHolder {
-        Button soundButton;
+        TextView soundButton;
 
         public SoundViewHolder(@NonNull View itemView) {
             super(itemView);

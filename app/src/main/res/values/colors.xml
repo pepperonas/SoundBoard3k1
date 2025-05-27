@@ -1,10 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Material 3 Light Theme Colors - Knallige Farben -->
+    <color name="md_theme_light_primary">#FF00FF</color>
+    <color name="md_theme_light_onPrimary">#000000</color>
+    <color name="md_theme_light_primaryContainer">#cdcdcd</color>
+    <color name="md_theme_light_onPrimaryContainer">#4A0080</color>
+    <color name="md_theme_light_secondary">#00FF00</color>
+    <color name="md_theme_light_onSecondary">#000000</color>
+    <color name="md_theme_light_secondaryContainer">#80FF80</color>
+    <color name="md_theme_light_onSecondaryContainer">#003300</color>
+    <color name="md_theme_light_tertiary">#FF6600</color>
+    <color name="md_theme_light_onTertiary">#000000</color>
+    <color name="md_theme_light_tertiaryContainer">#FFB380</color>
+    <color name="md_theme_light_onTertiaryContainer">#4D1F00</color>
+    <color name="md_theme_light_error">#F44336</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_errorContainer">#cdcdcd</color>
+    <color name="md_theme_light_onErrorContainer">#B71C1C</color>
+    <color name="md_theme_light_background">#FAFAFA</color>
+    <color name="md_theme_light_onBackground">#1C1C1C</color>
+    <color name="md_theme_light_surface">#F5F5F5</color>
+    <color name="md_theme_light_onSurface">#1C1C1C</color>
+    <color name="md_theme_light_surfaceVariant">#E0E0E0</color>
+    <color name="md_theme_light_onSurfaceVariant">#424242</color>
+    <color name="md_theme_light_outline">#79747E</color>
+    <color name="md_theme_light_inverseOnSurface">#F4EFF4</color>
+    <color name="md_theme_light_inverseSurface">#313033</color>
+    <color name="md_theme_light_inversePrimary">#cdcdcd</color>
+    
+    <!-- Material 3 Dark Theme Colors - Knallige Farben -->
+    <color name="md_theme_dark_primary">#00FFFF</color>
+    <color name="md_theme_dark_onPrimary">#003333</color>
+    <color name="md_theme_dark_primaryContainer">#00CCCC</color>
+    <color name="md_theme_dark_onPrimaryContainer">#B3FFFF</color>
+    <color name="md_theme_dark_secondary">#FF1744</color>
+    <color name="md_theme_dark_onSecondary">#FFFFFF</color>
+    <color name="md_theme_dark_secondaryContainer">#CC0033</color>
+    <color name="md_theme_dark_onSecondaryContainer">#cdcdcd</color>
+    <color name="md_theme_dark_tertiary">#FFEA00</color>
+    <color name="md_theme_dark_onTertiary">#332B00</color>
+    <color name="md_theme_dark_tertiaryContainer">#CCBB00</color>
+    <color name="md_theme_dark_onTertiaryContainer">#FFF8B3</color>
+    <color name="md_theme_dark_error">#cdcdcd</color>
+    <color name="md_theme_dark_onError">#880E4F</color>
+    <color name="md_theme_dark_errorContainer">#C2185B</color>
+    <color name="md_theme_dark_onErrorContainer">#cdcdcd</color>
+    <color name="md_theme_dark_background">#121212</color>
+    <color name="md_theme_dark_onBackground">#E1E1E1</color>
+    <color name="md_theme_dark_surface">#1E1E1E</color>
+    <color name="md_theme_dark_onSurface">#E1E1E1</color>
+    <color name="md_theme_dark_surfaceVariant">#2C2C2C</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C1C1C1</color>
+    <color name="md_theme_dark_outline">#938F99</color>
+    <color name="md_theme_dark_inverseOnSurface">#1C1B1F</color>
+    <color name="md_theme_dark_inverseSurface">#E6E1E5</color>
+    <color name="md_theme_dark_inversePrimary">#6750A4</color>
+    
+    <!-- Legacy colors for compatibility -->
+    <color name="purple_200">#D0BCFF</color>
+    <color name="purple_500">#6750A4</color>
+    <color name="purple_700">#4F378B</color>
+    <color name="teal_200">#81C784</color>
+    <color name="teal_700">#388E3C</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
