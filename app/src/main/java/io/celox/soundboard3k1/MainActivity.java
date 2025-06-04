@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import io.celox.soundboard3k1.databinding.ActivityMainBinding;
 import io.celox.soundboard3k1.fragments.SoundFragment;
+import io.celox.soundboard3k1.fragments.VideoFragment;
 import io.celox.soundboard3k1.models.SoundCategory;
 
 public class MainActivity extends AppCompatActivity {
@@ -62,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             String[] folders = getAssets().list("");
             for (String folder : folders) {
+                // Skip video folder
+                if (folder.equals("video")) {
+                    continue;
+                }
                 String[] files = getAssets().list(folder);
                 if (files != null && files.length > 0 && (files[0].endsWith(".mp3") || files[0].endsWith(".wav"))) {
                     String displayName = formatFolderName(folder);
@@ -82,19 +87,33 @@ public class MainActivity extends AppCompatActivity {
         Menu menu = binding.navView.getMenu();
         menu.clear();
         
-        // BottomNavigationView supports max 5 items
-        int maxItems = Math.min(soundCategories.size(), 5);
+        // BottomNavigationView supports max 5 items, reserve 1 for videos
+        int maxSoundItems = Math.min(soundCategories.size(), 4);
         
-        for (int i = 0; i < maxItems; i++) {
+        for (int i = 0; i < maxSoundItems; i++) {
             SoundCategory category = soundCategories.get(i);
             MenuItem menuItem = menu.add(Menu.NONE, i, Menu.NONE, category.getDisplayName());
             menuItem.setIcon(R.drawable.ic_dashboard_black_24dp);
         }
+        
+        // Add Videos tab
+        MenuItem videoItem = menu.add(Menu.NONE, 999, Menu.NONE, getString(R.string.title_videos));
+        videoItem.setIcon(android.R.drawable.ic_media_play);
 
         binding.navView.setOnItemSelectedListener(item -> {
-            int position = item.getItemId();
-            if (position < soundCategories.size()) {
-                loadFragment(soundCategories.get(position));
+            int id = item.getItemId();
+            if (id == 999) {
+                // Load video fragment
+                Fragment fragment = new VideoFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.nav_host_fragment_activity_main, fragment);
+                transaction.commit();
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setTitle(R.string.title_videos);
+                }
+                return true;
+            } else if (id < soundCategories.size()) {
+                loadFragment(soundCategories.get(id));
                 return true;
             }
             return false;

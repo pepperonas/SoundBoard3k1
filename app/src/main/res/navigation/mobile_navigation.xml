@@ -22,4 +22,10 @@
         android:name="io.celox.soundboard3k1.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/navigation_videos"
+        android:name="io.celox.soundboard3k1.fragments.VideoFragment"
+        android:label="@string/title_videos"
+        tools:layout="@layout/fragment_video" />
 </navigation>

@@ -3,5 +3,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="title_videos">Videos</string>
+    <string name="play_video">Video abspielen</string>
     <string name="theme_toggle">Theme umschalten</string>
 </resources>
