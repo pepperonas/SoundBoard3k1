@@ -1,14 +1,22 @@
 package io.celox.soundboard3k1.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import io.celox.soundboard3k1.R;
@@ -45,6 +53,14 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
                 soundPlayer.playSound(soundItem.getFolderName(), soundItem.getFileName());
             }
         });
+        
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                shareAudioFile(soundItem);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -60,6 +76,48 @@ public class SoundAdapter extends RecyclerView.Adapter<SoundAdapter.SoundViewHol
     public void release() {
         if (soundPlayer != null) {
             soundPlayer.release();
+        }
+    }
+    
+    private void shareAudioFile(SoundItem soundItem) {
+        try {
+            // Copy audio file from assets to cache directory
+            String assetPath = soundItem.getFolderName() + "/" + soundItem.getFileName();
+            File cacheDir = new File(context.getCacheDir(), "audio");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+            
+            File outputFile = new File(cacheDir, soundItem.getFileName());
+            
+            try (InputStream inputStream = context.getAssets().open(assetPath);
+                 FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+            }
+            
+            // Get URI using FileProvider
+            Uri contentUri = FileProvider.getUriForFile(context,
+                    context.getPackageName() + ".fileprovider",
+                    outputFile);
+            
+            // Create share intent
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("audio/*");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            
+            // Start chooser
+            Intent chooser = Intent.createChooser(shareIntent, "Teile Audio über...");
+            context.startActivity(chooser);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Fehler beim Teilen der Datei", Toast.LENGTH_SHORT).show();
         }
     }
 

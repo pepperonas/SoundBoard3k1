@@ -10,8 +10,8 @@ android {
         applicationId "io.celox.soundboard3k1"
         minSdk 24
         targetSdk 35
-        versionCode 4
-        versionName "0.0.4"
+        versionCode 6
+        versionName "0.0.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
