@@ -1,8 +1,13 @@
 package io.celox.soundboard3k1.adapters;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import io.celox.soundboard3k1.R;
@@ -63,45 +69,72 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     
     private void shareVideoFile(VideoItem video) {
         try {
-            // Copy video file from assets to cache directory
             String assetPath = video.getPath();
-            File cacheDir = new File(context.getCacheDir(), "shared_videos");
-            if (!cacheDir.exists()) {
-                cacheDir.mkdirs();
-            }
+            String fileName = assetPath.substring(assetPath.lastIndexOf('/') + 1);
             
-            // Extract the actual filename from the path
-            String originalFileName = assetPath.substring(assetPath.lastIndexOf('/') + 1);
-            File outputFile = new File(cacheDir, originalFileName);
+            Uri videoUri;
             
-            try (InputStream inputStream = context.getAssets().open(assetPath);
-                 FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Use MediaStore for Android 10+
+                ContentResolver resolver = context.getContentResolver();
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
+                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/SoundBoard3k1");
                 
-                byte[] buffer = new byte[8192];
-                int length;
-                while ((length = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, length);
+                videoUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
+                
+                if (videoUri != null) {
+                    try (InputStream inputStream = context.getAssets().open(assetPath);
+                         OutputStream outputStream = resolver.openOutputStream(videoUri)) {
+                        
+                        byte[] buffer = new byte[8192];
+                        int length;
+                        while ((length = inputStream.read(buffer)) > 0) {
+                            outputStream.write(buffer, 0, length);
+                        }
+                    }
                 }
+            } else {
+                // Fallback for older Android versions
+                File moviesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+                File appDir = new File(moviesDir, "SoundBoard3k1");
+                if (!appDir.exists()) {
+                    appDir.mkdirs();
+                }
+                
+                File outputFile = new File(appDir, fileName);
+                
+                try (InputStream inputStream = context.getAssets().open(assetPath);
+                     FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                    
+                    byte[] buffer = new byte[8192];
+                    int length;
+                    while ((length = inputStream.read(buffer)) > 0) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                }
+                
+                videoUri = FileProvider.getUriForFile(context,
+                        context.getPackageName() + ".fileprovider",
+                        outputFile);
             }
             
-            // Get URI using FileProvider
-            Uri contentUri = FileProvider.getUriForFile(context,
-                    context.getPackageName() + ".fileprovider",
-                    outputFile);
+            if (videoUri != null) {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("video/mp4");
+                shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri);
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                
+                Intent chooser = Intent.createChooser(shareIntent, "Teile Video über...");
+                context.startActivity(chooser);
+            } else {
+                Toast.makeText(context, "Fehler beim Erstellen der Video-URI", Toast.LENGTH_SHORT).show();
+            }
             
-            // Create share intent
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("video/mp4");
-            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            
-            // Start chooser
-            Intent chooser = Intent.createChooser(shareIntent, "Teile Video über...");
-            context.startActivity(chooser);
-            
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "Fehler beim Teilen der Datei", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
