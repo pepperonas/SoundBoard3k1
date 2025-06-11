@@ -1,13 +1,8 @@
 package io.celox.soundboard3k1.adapters;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import io.celox.soundboard3k1.R;
@@ -71,70 +65,74 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         try {
             String assetPath = video.getPath();
             String fileName = assetPath.substring(assetPath.lastIndexOf('/') + 1);
+            String mimeType = getMimeType(fileName);
             
-            Uri videoUri;
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Use MediaStore for Android 10+
-                ContentResolver resolver = context.getContentResolver();
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
-                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/SoundBoard3k1");
-                
-                videoUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
-                
-                if (videoUri != null) {
-                    try (InputStream inputStream = context.getAssets().open(assetPath);
-                         OutputStream outputStream = resolver.openOutputStream(videoUri)) {
-                        
-                        byte[] buffer = new byte[8192];
-                        int length;
-                        while ((length = inputStream.read(buffer)) > 0) {
-                            outputStream.write(buffer, 0, length);
-                        }
-                    }
-                }
-            } else {
-                // Fallback for older Android versions
-                File moviesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
-                File appDir = new File(moviesDir, "SoundBoard3k1");
-                if (!appDir.exists()) {
-                    appDir.mkdirs();
-                }
-                
-                File outputFile = new File(appDir, fileName);
-                
-                try (InputStream inputStream = context.getAssets().open(assetPath);
-                     FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-                    
-                    byte[] buffer = new byte[8192];
-                    int length;
-                    while ((length = inputStream.read(buffer)) > 0) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                }
-                
-                videoUri = FileProvider.getUriForFile(context,
-                        context.getPackageName() + ".fileprovider",
-                        outputFile);
+            // Use cache directory for consistent sharing approach
+            File cacheDir = new File(context.getCacheDir(), "shared_videos");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
             }
+            
+            File cachedFile = new File(cacheDir, fileName);
+            
+            // Copy asset to cache directory
+            try (InputStream inputStream = context.getAssets().open(assetPath);
+                 FileOutputStream outputStream = new FileOutputStream(cachedFile)) {
+                
+                byte[] buffer = new byte[8192];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+            }
+            
+            // Create URI using FileProvider
+            Uri videoUri = FileProvider.getUriForFile(context,
+                    context.getPackageName() + ".fileprovider",
+                    cachedFile);
             
             if (videoUri != null) {
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("video/mp4");
+                shareIntent.setType(mimeType);
                 shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri);
                 shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 
                 Intent chooser = Intent.createChooser(shareIntent, "Teile Video über...");
-                context.startActivity(chooser);
+                if (shareIntent.resolveActivity(context.getPackageManager()) != null) {
+                    context.startActivity(chooser);
+                } else {
+                    Toast.makeText(context, "Keine App zum Teilen von Videos gefunden", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(context, "Fehler beim Erstellen der Video-URI", Toast.LENGTH_SHORT).show();
             }
             
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Fehler beim Kopieren der Video-Datei: " + e.getMessage(), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Unerwarteter Fehler beim Teilen: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private String getMimeType(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        switch (extension) {
+            case "mp4":
+                return "video/mp4";
+            case "webm":
+                return "video/webm";
+            case "mkv":
+                return "video/x-matroska";
+            case "avi":
+                return "video/x-msvideo";
+            case "mov":
+                return "video/quicktime";
+            case "3gp":
+                return "video/3gpp";
+            default:
+                return "video/*";
         }
     }
 
