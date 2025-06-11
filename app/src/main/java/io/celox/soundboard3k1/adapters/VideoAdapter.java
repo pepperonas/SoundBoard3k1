@@ -64,77 +64,57 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     private void shareVideoFile(VideoItem video) {
         try {
             String assetPath = video.getPath();
-            String fileName = assetPath.substring(assetPath.lastIndexOf('/') + 1);
-            String mimeType = getMimeType(fileName);
+            String originalFileName = assetPath.substring(assetPath.lastIndexOf('/') + 1);
             
-            // Use cache directory for consistent sharing approach
-            File cacheDir = new File(context.getCacheDir(), "shared_videos");
+            // Replace spaces and special characters for WhatsApp compatibility
+            String safeFileName = originalFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            
+            // Use cache directory - works best for all Android versions
+            File cacheDir = new File(context.getCacheDir(), "videos");
             if (!cacheDir.exists()) {
                 cacheDir.mkdirs();
             }
             
-            File cachedFile = new File(cacheDir, fileName);
+            File outputFile = new File(cacheDir, safeFileName);
             
-            // Copy asset to cache directory
+            // Always copy fresh to ensure file is accessible
             try (InputStream inputStream = context.getAssets().open(assetPath);
-                 FileOutputStream outputStream = new FileOutputStream(cachedFile)) {
+                 FileOutputStream outputStream = new FileOutputStream(outputFile)) {
                 
-                byte[] buffer = new byte[8192];
+                byte[] buffer = new byte[1024];
                 int length;
                 while ((length = inputStream.read(buffer)) > 0) {
                     outputStream.write(buffer, 0, length);
                 }
+                outputStream.flush();
+                outputStream.close();
+                inputStream.close();
             }
             
             // Create URI using FileProvider
             Uri videoUri = FileProvider.getUriForFile(context,
                     context.getPackageName() + ".fileprovider",
-                    cachedFile);
+                    outputFile);
             
-            if (videoUri != null) {
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType(mimeType);
-                shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri);
-                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                
-                Intent chooser = Intent.createChooser(shareIntent, "Teile Video über...");
-                if (shareIntent.resolveActivity(context.getPackageManager()) != null) {
-                    context.startActivity(chooser);
-                } else {
-                    Toast.makeText(context, "Keine App zum Teilen von Videos gefunden", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(context, "Fehler beim Erstellen der Video-URI", Toast.LENGTH_SHORT).show();
-            }
+            // Share via Intent with explicit WhatsApp handling
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("video/*");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            
+            // Start chooser
+            context.startActivity(Intent.createChooser(shareIntent, "Video teilen"));
             
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Fehler beim Kopieren der Video-Datei: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Fehler beim Kopieren der Video-Datei", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "Unerwarteter Fehler beim Teilen: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Fehler beim Teilen des Videos", Toast.LENGTH_SHORT).show();
         }
     }
-    
-    private String getMimeType(String fileName) {
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        switch (extension) {
-            case "mp4":
-                return "video/mp4";
-            case "webm":
-                return "video/webm";
-            case "mkv":
-                return "video/x-matroska";
-            case "avi":
-                return "video/x-msvideo";
-            case "mov":
-                return "video/quicktime";
-            case "3gp":
-                return "video/3gpp";
-            default:
-                return "video/*";
-        }
-    }
+
 
     static class VideoViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
