@@ -15,16 +15,26 @@
 [![GitHub issues](https://img.shields.io/github/issues/pepperonas/noice-board)](https://github.com/pepperonas/noice-board/issues)
 [![GitHub stars](https://img.shields.io/github/stars/pepperonas/noice-board?style=social)](https://github.com/pepperonas/noice-board)
 
-A soundboard Android app with multiple sound categories, video playback, and sharing functionality.
+A soundboard Android app with categorized sound buttons, video playback, and sharing functionality. Sound categories are auto-discovered from asset folders — just drop files in and rebuild.
 
 ## Features
 
-- Multiple sound categories auto-discovered from asset folders
-- Video playback (MP4, WebM, MKV)
+- 5 sound categories with 395 sounds, auto-discovered from asset folders
+- 11 videos with fullscreen playback (MP4, WebM, MKV)
 - Long-press to share sounds and videos (WhatsApp-compatible)
 - Dark/Light theme toggle with persistence
-- Bottom Navigation for quick category switching
+- Bottom Navigation for quick category switching (up to 5 tabs)
 - Material Design 3 UI
+
+## Sound Categories
+
+| Category | Sounds | Description |
+|----------|--------|-------------|
+| Admin Plugin | 262 | Admin & plugin sounds |
+| Jngles | 71 | Jingles & short tunes |
+| Dart | 24 | Dart game announcements |
+| Connect | 21 | Connection sounds |
+| Quake | 17 | Quake arena sounds |
 
 ## Build
 
