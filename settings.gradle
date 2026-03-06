@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SoundBoard3k1"
+rootProject.name = "NoiceBoard"
 include ':app'

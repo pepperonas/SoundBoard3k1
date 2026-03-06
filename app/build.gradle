@@ -33,7 +33,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all {
-            def appName = "SoundBoard3k1"
+            def appName = "NoiceBoard"
             def versionName = variant.versionName
             outputFileName = "${appName}-${versionName}.apk"
         }
