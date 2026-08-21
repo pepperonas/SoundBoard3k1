@@ -1,8 +1,6 @@
 package io.celox.soundboard3k1;
 
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // Load theme preference before super.onCreate()
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean isNightMode = sharedPreferences.getBoolean(KEY_NIGHT_MODE, false);
+        boolean isNightMode = sharedPreferences.getBoolean(KEY_NIGHT_MODE, true);
         AppCompatDelegate.setDefaultNightMode(
             isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
         );
@@ -51,8 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
         loadSoundCategories();
         setupBottomNavigation();
-        styleBottomNavigation();
-        
         if (savedInstanceState == null && !soundCategories.isEmpty()) {
             loadFragment(soundCategories.get(0));
         }
@@ -160,30 +156,4 @@ public class MainActivity extends AppCompatActivity {
         );
     }
     
-    private void styleBottomNavigation() {
-        boolean isNightMode = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
-        
-        if (!isNightMode) {
-            // Light theme - set neutral gray background
-            binding.navView.setBackgroundColor(Color.parseColor("#F5F5F5"));
-            binding.navView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F5F5F5")));
-            
-            // Create color state list for icon/text
-            int[][] states = new int[][] {
-                new int[] { android.R.attr.state_selected },
-                new int[] { -android.R.attr.state_selected }
-            };
-            
-            int[] colors = new int[] {
-                Color.parseColor("#000000"), // Selected - Black
-                Color.parseColor("#757575")   // Unselected - Medium gray
-            };
-            
-            ColorStateList colorStateList = new ColorStateList(states, colors);
-            binding.navView.setItemIconTintList(colorStateList);
-            binding.navView.setItemTextColor(colorStateList);
-            binding.navView.setItemRippleColor(null); // Remove ripple
-            binding.navView.setItemActiveIndicatorColor(null); // Remove active indicator
-        }
-    }
 }
